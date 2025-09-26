@@ -117,7 +117,7 @@ public class combat {
                     }
 
                 //Player 1 block code
-                } else if (num1 == 0) {
+                } else if (num1 == 3) {
                     System.out.println("You blocked");
                 }
 
@@ -263,4 +263,5 @@ public class combat {
             }
         }
     }
+
 }

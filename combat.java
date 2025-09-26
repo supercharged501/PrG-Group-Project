@@ -32,31 +32,37 @@ public class combat {
                         case 1: for (int a = 1; a <= 15; a++) {
                             p1Damage++;
                         }
+                        System.out.println("Player 1 punched");
                         break;
 
                         case 2: for (int a = 1; a <= 15; a++) {
                             p1Damage++;
                         }
+                        System.out.println("Player 1 punched");
                         break;
 
                         case 3: for (int a = 1; a <= 15; a++) {
                             p1Damage++;
                         }
+                        System.out.println("Player 1 punched");
                         break;
 
                         case 4: for (int a = 1; a <= 15; a++) {
                             p1Damage++;
                         }
+                        System.out.println("Player 1 punched");
                         break;
 
                         case 5: for (int a = 1; a <= 15; a++) {
                             p1Damage++;
                         }
+                        System.out.println("Player 1 punched");
                         break;
 
                         case 6: for (int a = 1; a <= 15; a++) {
                             p1Damage++;
                         }
+                        System.out.println("Player 1 punched");
                         break;
 
                         case 7: for (int a = 1; a <= 28; a++) {
@@ -80,9 +86,10 @@ public class combat {
                         default:
                             break;
                     }
+
                 // Player 1 kick code
                 } else if (num1 == 2) {
-                    System.out.println("You kicked your enemy");
+                    System.out.println("Player 1 Kicked Their Enemy");
 
                     int attackKick = rnd.nextInt(5) + 1;
 
@@ -90,26 +97,31 @@ public class combat {
                         case 1: for (int a = 1; a <= 15; a++) {
                             p1Damage++;
                         }
+                        System.out.println("Player 1 Kicked Ther Enemy!!");
                         break;
 
                         case 2: for (int a = 1; a <= 15; a++) {
                             p1Damage++;
                         }
+                        System.out.println("Player 1 Kicked Ther Enemy!!");
                         break;
 
                         case 3: for (int a = 1; a <= 28; a++) {
                             p1Damage++;
                         }
+                        System.out.println("Player 1 Performed Hard Kick !!");
                         break;
 
                         case 4: for (int a = 1; a <= 30; a++) {
                             p1Damage++; 
                         }
+                        System.out.println("Player 1 Performed Power Kick !!");
                         break;
 
                         case 5: for (int a = 1; a <= 35; a++) { 
                             p1Damage++;
                         }
+                        System.out.println("Player 1 Performed Power Kick !!");
                         break;
 
                         default:
@@ -118,7 +130,7 @@ public class combat {
 
                 //Player 1 block code
                 } else if (num1 == 3) {
-                    System.out.println("You blocked");
+                    System.out.println("Player 1 blocked");
                 }
 
 
@@ -133,31 +145,37 @@ public class combat {
                         case 1: for (int a = 1; a <= 15; a++) {
                             p2Damage++;
                         }
+                        System.out.println("Player 2 punched");
                         break;
 
                         case 2: for (int a = 1; a <= 15; a++) {
                             p2Damage++;
                         }
+                        System.out.println("Player 2 punched");
                         break;
 
                         case 3: for (int a = 1; a <= 15; a++) { 
                             p2Damage++;
                         }
+                        System.out.println("Player 2 punched");
                         break;
 
                         case 4: for (int a = 1; a <= 15; a++) {
                             p2Damage++;
                         }
+                        System.out.println("Player 2 punched");
                         break;
 
                         case 5: for (int a = 1; a <= 15; a++) {
                             p2Damage++;
                         }
+                        System.out.println("Player 2 punched");
                         break;
 
                         case 6: for (int a = 1; a <= 15; a++) {
                             p2Damage++;
                         }
+                        System.out.println("Player 2 punched");
                         break;
 
                         case 7: for (int a = 1; a <= 28; a++) {
@@ -184,7 +202,7 @@ public class combat {
 
                 //Player 2 kick code
                 } else if (num2 == 9) {
-                    System.out.println("You kicked your enemy");
+                    System.out.println("Player 2 Kicked Their enemy");
 
                     int attackKick = rnd.nextInt(5) + 1;
 
@@ -192,26 +210,31 @@ public class combat {
                         case 1: for (int a = 1; a <= 15; a++) {
                             p2Damage++;
                         }
+                        System.out.println("Player 2 Kicked Their Enemy!!");
                         break;
 
                         case 2: for (int a = 1; a <= 15; a++) {
                             p2Damage++;
                         }
+                        System.out.println("Player 2 Kicked Their Enemy !!");
                         break;
 
                         case 3: for (int a = 1; a <= 28; a++) {
                             p2Damage++;
                         }
+                        System.out.println("Player 2 Performed Hard Kick !!");
                         break;
 
                         case 4: for (int a = 1; a <= 30; a++) {
                             p2Damage++;
                         }
+                        System.out.println("Player 2 Performed Power Kick !!");
                         break;
 
                         case 5: for (int a = 1; a <= 35; a++) {
                             p2Damage++;
                          }
+                         System.out.println("Player 2 Performed Power Kick !!");
                          break;
 
                         default:
@@ -219,11 +242,11 @@ public class combat {
                     }
                 //Player 2 block code
                 } else if (num2 == 0) {
-                    System.out.println("You blocked");
+                    System.out.println("Player 2 blocked");
                 }
 
                 // Code for reducing the impact damage when blocking
-                if (num1 == 0 && p2Damage > 0) {
+                if (num1 == 3 && p2Damage > 0) {
                     p2Damage = p2Damage / 2;
                     System.out.println("Player 1 blocked! Damage reduced.");
                 }
@@ -263,5 +286,4 @@ public class combat {
             }
         }
     }
-
 }

@@ -1,0 +1,54 @@
+public class Fighters {
+    // Attributes
+    private String name;
+    private int healthBoost;
+    private String attackMove;
+    private String defenceMove;
+    private String specialAbility;
+
+    // Constructor
+    public Fighters(String name, int healthBoost, String attackMove, String defenceMove, String specialAbility) {
+        this.name = name;
+        this.healthBoost = healthBoost;
+        this.attackMove = attackMove;
+        this.defenceMove = defenceMove;
+        this.specialAbility = specialAbility;
+    }
+
+    // Display full fighter info
+    public void displayInfo() {
+        System.out.println("Fighter Name: " + name);
+        System.out.println("Health Boost: " + healthBoost);
+        System.out.println("Attack Move: " + attackMove);
+        System.out.println("Defence Move: " + defenceMove);
+        System.out.println("Special Ability: " + specialAbility);
+        System.out.println("-----------------------------------");
+    }
+
+    // Display combat-relevant stats
+    public void displayCombatStats() {
+        System.out.println("Preparing for Combat...");
+        System.out.println("Fighter: " + name);
+        System.out.println("Health Boost: " + healthBoost);
+        System.out.println("Attack Move: " + attackMove);
+        System.out.println("Defence Move: " + defenceMove);
+        System.out.println("-----------------------------------");
+    }
+
+    // Main method is now correctly placed inside the class
+    public static void main(String[] args) {
+        // Create an array of Fighters objects, using the correct class name
+        Fighters[] fighters = new Fighters[6];
+
+        fighters[0] = new Fighters("Menelik II", 100, "A mighty blow", "Absorbs enemy damage", "Legendary crushing counterattack");
+        fighters[1] = new Fighters("Cleopatra", 95, "Powerful strike with poison", "Enemy hesitates reducing their attack", "Overwhelming inescapable attack");
+        fighters[2] = new Fighters("Mansa Musa", 100, "Heavy punch infused with wealth", "Reduce damage, gold protects him", "Crushing strike");
+        fighters[3] = new Fighters("Shaka Zulu", 95, "Deals a powerful spear attack", "Halves damage by raising defences", "Unstoppable devastating attack");
+        fighters[4] = new Fighters("Hannibal Barca", 90, "Crushing blow", "Reduces enemy damage", "Massive devastating attack");
+        fighters[5] = new Fighters("Queen Nzinga", 95, "Precise punishing blow", "Blocks enemy attack with cunning tactics", "A furious no mercy strike");
+
+        // Display combat stats for all fighters
+        for (Fighters fighter : fighters) {
+            fighter.displayCombatStats();
+        }
+    }

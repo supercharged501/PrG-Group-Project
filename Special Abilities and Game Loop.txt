@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>African Legends: The Battle</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the game board */
+        /* REVERTED font imports: Cinzel Decorative for titles, Cinzel for body text */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;700&display=swap');
+        
+        body {
+            /* Use Cinzel for general text for that classic, sharp look */
+            font-family: 'Cinzel', serif; 
+            background-color: #111827; /* Tailwind gray-900 */
+        }
+        
+        /* Specific class for the largest titles to use the Cinzel Decorative version */
+        .title-font {
+            /* Reverting to Cinzel Decorative for a legendary, chiseled look */
+            font-family: 'Cinzel Decorative', cursive;
+            /* Removing specific styling added for Bebas Neue */
+            text-transform: none; 
+            letter-spacing: normal;
+        }
+
+        .health-bar-bg {
+            background-color: #4b5563; /* Darker background for empty bar */
+        }
+        .health-bar-fill {
+            transition: width 0.5s ease-in-out, background-color 0.5s;
+        }
+        .fighter-card {
+            /* Updated border and shadow for dark theme, using gold accent */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border: 3px solid #d97706; /* Amber-600 border */
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex flex-col items-center">
+
+    <div id="game-container" class="w-full max-w-4xl">
+        <!-- Main Title now uses the Cinzel Decorative font -->
+        <h1 class="text-3xl md:text-4xl font-extrabold text-center text-amber-400 mb-8 border-b-2 border-amber-600 pb-3 title-font">AFRICAN LEGENDS</h1>
+        
+        <!-- Character Selection Screen (NOW WITH DROPDOWN) -->
+        <div id="selection-screen" class="bg-gray-800 p-6 rounded-xl fighter-card transition-all text-white">
+            <!-- Heading also uses the decorative font -->
+            <h2 class="text-xl font-bold mb-6 text-center text-amber-400 title-font">SELECT YOUR CHAMPION</h2>
+            
+            <div class="flex flex-col items-center space-y-4">
+                <select id="champion-select" class="w-full max-w-xs p-3 border-2 border-amber-600 rounded-lg text-lg font-semibold bg-gray-900 text-white focus:ring-amber-500 focus:border-amber-500">
+                    <!-- Options populated by JS -->
+                </select>
+                <button onclick="startBattleFromSelection()" id="start-battle-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors shadow-lg w-full max-w-xs disabled:opacity-50">
+                    START BATTLE
+                </button>
+            </div>
+            
+        </div>
+
+        <!-- Battle Screen -->
+        <div id="battle-screen" class="hidden flex flex-col gap-6">
+            
+            <!-- Fighters Display: ALWAYS SIDE-BY-SIDE (grid-cols-2) -->
+            <div class="grid grid-cols-2 gap-4 md:gap-6">
+                <!-- Player Card (Left-aligned) -->
+                <div id="player-card" class="fighter-card bg-gray-800 p-3 md:p-4 rounded-xl text-white">
+                    <!-- Player Name size reduced: text-xl/2xl -> text-lg/xl -->
+                    <h3 class="text-lg md:text-xl font-black mb-2 text-blue-400 text-left" id="player-name">Player</h3>
+                    <div class="text-xs md:text-sm font-semibold mb-1 text-gray-300 text-left" id="player-ability-info"></div>
+                    <!-- DOT info is red -->
+                    <p class="text-[10px] md:text-xs mb-3 text-red-400 font-bold text-left" id="player-dot-info"></p>
+                    
+                    <div class="health-bar-bg rounded-full h-4">
+                        <div id="player-health-fill" class="health-bar-fill bg-green-500 h-full rounded-full w-full flex items-center justify-start pl-2 text-xs font-bold text-white">100/100</div>
+                    </div>
+                </div>
+
+                <!-- Computer Card (Right-aligned) -->
+                <div id="computer-card" class="fighter-card bg-gray-800 p-3 md:p-4 rounded-xl text-white">
+                    <!-- Computer Name size reduced: text-xl/2xl -> text-lg/xl -->
+                    <h3 class="text-lg md:text-xl font-black mb-2 text-red-400 text-right" id="computer-name">Computer</h3>
+                    <div class="text-xs md:text-sm font-semibold mb-1 text-gray-300 text-right" id="computer-ability-info"></div>
+                    <!-- DOT info is red -->
+                    <p class="text-[10px] md:text-xs mb-3 text-red-400 font-bold text-right" id="computer-dot-info"></p>
+                    
+                    <div class="health-bar-bg rounded-full h-4">
+                        <div id="computer-health-fill" class="health-bar-fill bg-green-500 h-full rounded-full w-full flex items-center justify-end pr-2 text-xs font-bold text-white">100/100</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action and Log -->
+            <div class="flex flex-col gap-6 lg:flex-row">
+                <!-- Action Buttons -->
+                <div class="lg:w-1/3 bg-gray-800 p-4 rounded-xl fighter-card">
+                    <!-- Title also uses the decorative font -->
+                    <h4 class="text-lg font-bold mb-3 text-center text-amber-400 title-font">Your Actions</h4>
+                    <div id="action-buttons" class="flex flex-col space-y-3">
+                        <button onclick="handleAction('attack')" id="attack-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-lg">
+                            ATTACK
+                        </button>
+                        <button onclick="handleAction('ability')" id="ability-btn" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-lg">
+                            USE ABILITY (<span id="ability-cooldown">CD: 0</span>)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Battle Log -->
+                <div class="lg:w-2/3 bg-gray-800 p-4 rounded-xl fighter-card text-white">
+                    <!-- Title also uses the decorative font -->
+                    <h4 class="text-lg font-bold mb-3 text-amber-400 title-font">Battle Log</h4>
+                    <!-- Log uses a darker background for contrast -->
+                    <div id="battle-log" class="h-48 overflow-y-auto bg-gray-900 p-3 rounded text-sm space-y-1 border border-gray-700">
+                        <!-- Log messages appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Over Modal (Hidden by default) -->
+            <div id="game-over-modal" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center p-4 hidden">
+                <div class="bg-gray-800 p-8 rounded-xl fighter-card text-center w-full max-w-sm text-white">
+                    <!-- Title also uses the decorative font -->
+                    <h3 class="text-2xl font-extrabold mb-4 text-amber-400 title-font" id="winner-message"></h3>
+                    <button onclick="restartGame()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mt-4 shadow-lg">
+                        Play Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Core Game Data ---
+        const BASE_STATS = {
+            "Mansa Musa": { health: 100, damage: 15, cooldown: 3, rushDmg: 0, buffAmt: 0, curseDmg: 0, ability: "Wealth Heal" },
+            "Shaka Zulu": { health: 100, damage: 20, cooldown: 2, rushDmg: 0, buffAmt: 0, curseDmg: 0, ability: "Double Damage" },
+            "Tutankhamun": { health: 100, damage: 15, cooldown: 2, rushDmg: 0, buffAmt: 0, curseDmg: 5, ability: "Pharaoh's Curse" },
+            "Queen Nzinga": { health: 100, damage: 10, cooldown: 2, rushDmg: 0, buffAmt: 10, curseDmg: 0, ability: "Inspire Buff" },
+            "Hannibal Barca": { health: 100, damage: 15, cooldown: 3, rushDmg: 40, buffAmt: 0, curseDmg: 0, ability: "Elephant Rush" },
+        };
+
+        // --- Game State ---
+        let player = null;
+        let computer = null;
+        let isPlayerTurn = true;
+        let isGameActive = false;
+
+        // --- Utility Functions ---
+
+        /** Logs a message to the battle log UI. */
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('battle-log');
+            const p = document.createElement('p');
+            p.innerHTML = message; // Using innerHTML to allow for bolding (e.g., in critical hits)
+            p.className = 'py-1 border-b border-gray-700'; // Darker separator
+            
+            if (type === 'ability') p.className += ' text-amber-400 font-semibold'; // Gold for ability
+            else if (type === 'damage') p.className += ' text-red-500 font-semibold';
+            else if (type === 'critical') p.className += ' text-red-300 font-extrabold italic bg-gray-700 px-1 rounded';
+            else if (type === 'heal') p.className += ' text-green-500 font-semibold';
+            else if (type === 'turn') p.className += ' text-gray-300 font-bold bg-gray-700 px-1 rounded';
+            else p.className += ' text-gray-400';
+            
+            logElement.appendChild(p);
+            logElement.scrollTop = logElement.scrollHeight; // Auto-scroll to bottom
+        }
+
+        /**
+         * The Fighter Class, mirroring the Java structure.
+         */
+        class Fighter {
+            constructor(name, stats) {
+                this.name = name;
+                this.health = stats.health;
+                this.maxHealth = stats.health;
+                this.baseDamage = stats.damage;
+                this.specialAbility = stats.ability;
+                
+                this.cooldownRemaining = 0; // Starts ready
+                this.abilityCooldown = stats.cooldown; // Base cooldown
+                this.specialActive = false;
+                this.buffDuration = 0;
+                this.curseTurns = 0;
+                this.curseDamage = stats.curseDmg;
+                this.buffAmount = stats.buffAmt;
+                this.rushDamage = stats.rushDmg;
+            }
+
+            /** Performs a standard attack, applying active buffs/debuffs. */
+            attack(target) {
+                let finalDamage = this.baseDamage;
+                let message = `${this.name} attacks ${target.name}`;
+                let isCritical = false;
+
+                // --- CRITICAL HIT CHECK ---
+                if (Math.random() < 0.15) { // 15% chance for 1.5x damage
+                    finalDamage = Math.floor(finalDamage * 1.5);
+                    message += " and lands a **CRITICAL HIT!**";
+                    isCritical = true;
+                }
+
+                // Apply Buffs before damage calculation
+                if (this.name === "Shaka Zulu" && this.specialActive) {
+                    finalDamage *= 2;
+                    message += " with DOUBLE DAMAGE!";
+                    this.buffDuration--;
+                    if (this.buffDuration <= 0) {
+                        this.specialActive = false;
+                        log(`${this.name}'s Double Damage buff fades.`, 'info');
+                    }
+                } else if (this.name === "Queen Nzinga" && this.specialActive) {
+                    finalDamage += this.buffAmount;
+                    message += ` with an Inspired attack (+${this.buffAmount} damage)!`;
+                    this.buffDuration--;
+                    if (this.buffDuration <= 0) {
+                        this.specialActive = false;
+                        log(`${this.name}'s Inspire buff fades.`, 'info');
+                    }
+                }
+                
+                target.health -= finalDamage;
+                target.health = Math.max(0, target.health);
+                
+                log(`${message} dealing ${finalDamage} damage.`, isCritical ? 'critical' : 'damage');
+            }
+
+            /** Executes the fighter's unique special ability. */
+            useAbility(opponent) {
+                if (this.cooldownRemaining > 0) {
+                    log(`${this.name}'s ${this.specialAbility} is on cooldown. (${this.cooldownRemaining} turns remaining)`, 'info');
+                    return false; // Failed to use ability
+                }
+
+                log(`${this.name} uses ${this.specialAbility}!`, 'ability');
+                
+                switch (this.name) {
+                    case "Mansa Musa":
+                        const healAmount = 30;
+                        this.health = Math.min(this.maxHealth, this.health + healAmount);
+                        this.cooldownRemaining = this.abilityCooldown; // 3
+                        log(` Heals for ${healAmount}. Health is now ${this.health}.`, 'heal');
+                        break;
+                    case "Shaka Zulu":
+                        this.specialActive = true;
+                        this.buffDuration = 1; // Buff applies on the NEXT attack (which happens this turn)
+                        this.cooldownRemaining = this.abilityCooldown; // 2
+                        log(" Prepares for a devastating Double Damage attack!", 'ability');
+                        break;
+                    case "Tutankhamun":
+                        opponent.curseTurns = 2;
+                        opponent.curseDamage = 5;
+                        this.cooldownRemaining = this.abilityCooldown; // 2
+                        log(` Curses ${opponent.name}! Takes ${opponent.curseDamage} damage for ${opponent.curseTurns} turns.`, 'ability');
+                        break;
+                    case "Queen Nzinga":
+                        this.specialActive = true;
+                        this.buffDuration = 1; // Buff applies on the NEXT attack
+                        this.cooldownRemaining = this.abilityCooldown; // 2
+                        log(" Inspires her forces! Attack power increased for the next turn.", 'ability');
+                        break;
+                    case "Hannibal Barca":
+                        opponent.health -= this.rushDamage;
+                        opponent.health = Math.max(0, opponent.health);
+                        this.cooldownRemaining = this.abilityCooldown; // 3
+                        log(` Commands an Elephant Rush, dealing a massive ${this.rushDamage} damage!`, 'damage');
+                        break;
+                }
+                return true; // Successfully used ability
+            }
+            
+            /** Applies damage over time (DOT) effects. */
+            applyDOTs() {
+                if (this.curseTurns > 0) {
+                    this.health -= this.curseDamage;
+                    this.health = Math.max(0, this.health);
+                    this.curseTurns--;
+                    log(`${this.name} suffers ${this.curseDamage} damage from Pharaoh's Curse!`, 'damage');
+                }
+            }
+
+            /** Decrements ability cooldowns. */
+            decrementCooldown() {
+                if (this.cooldownRemaining > 0) {
+                    this.cooldownRemaining--;
+                }
+            }
+        }
+
+        // --- Game Flow Functions ---
+
+        /** Updates the UI elements based on the current game state. */
+        function updateUI() {
+            if (!player || !computer) return;
+            
+            // --- General UI Updates ---
+            document.getElementById('player-name').textContent = player.name;
+            document.getElementById('computer-name').textContent = computer.name;
+            document.getElementById('player-ability-info').textContent = player.specialActive ? `Buff Active!` : `Ability: ${player.specialAbility}`;
+            document.getElementById('computer-ability-info').textContent = computer.specialActive ? `Buff Active!` : `Ability: ${computer.specialAbility}`;
+            
+            // --- DOT Info ---
+            document.getElementById('player-dot-info').textContent = player.curseTurns > 0 ? `CURSED: ${player.curseTurns} turns left` : '';
+            document.getElementById('computer-dot-info').textContent = computer.curseTurns > 0 ? `CURSED: ${computer.curseTurns} turns left` : '';
+
+            // --- Health Bar Updates ---
+            function updateHealthBar(fighter, prefix) {
+                const percentage = (fighter.health / fighter.maxHealth) * 100;
+                const fillElement = document.getElementById(`${prefix}-health-fill`);
+                fillElement.style.width = `${percentage}%`;
+                fillElement.textContent = `${fighter.health}/${fighter.maxHealth}`;
+                
+                // Change color based on health percentage
+                if (percentage > 50) {
+                    fillElement.className = fillElement.className.replace(/bg-(red|yellow)-\d+/, 'bg-green-500');
+                } else if (percentage > 20) {
+                    fillElement.className = fillElement.className.replace(/bg-(green|red)-\d+/, 'bg-yellow-500');
+                } else {
+                    fillElement.className = fillElement.className.replace(/bg-(green|yellow)-\d+/, 'bg-red-500');
+                }
+            }
+            updateHealthBar(player, 'player');
+            updateHealthBar(computer, 'computer');
+            
+            // --- Action Button State ---
+            const attackBtn = document.getElementById('attack-btn');
+            const abilityBtn = document.getElementById('ability-btn');
+            const abilityCdSpan = document.getElementById('ability-cooldown');
+
+            if (isPlayerTurn && isGameActive) {
+                attackBtn.disabled = false;
+                abilityBtn.disabled = player.cooldownRemaining > 0;
+                attackBtn.classList.remove('opacity-50');
+                abilityBtn.classList.toggle('opacity-50', abilityBtn.disabled);
+                abilityCdSpan.textContent = `CD: ${player.cooldownRemaining}`;
+            } else {
+                attackBtn.disabled = true;
+                abilityBtn.disabled = true;
+                attackBtn.classList.add('opacity-50');
+                abilityBtn.classList.add('opacity-50');
+            }
+        }
+
+        /** Checks if the game is over and displays the winner. */
+        function checkWinCondition() {
+            if (player.health <= 0) {
+                declareWinner(computer);
+                return true;
+            }
+            if (computer.health <= 0) {
+                declareWinner(player);
+                return true;
+            }
+            return false;
+        }
+
+        /** Declares the winner and shows the game over modal. */
+        function declareWinner(winner) {
+            isGameActive = false;
+            const message = winner.name === player.name ? `VICTORY! ${winner.name} Triumphs!` : `DEFEAT! ${winner.name} Prevails.`;
+            document.getElementById('winner-message').textContent = message;
+            document.getElementById('game-over-modal').classList.remove('hidden');
+            log(`*** ${winner.name} WINS THE BATTLE! ***`, 'turn');
+        }
+
+        /** AI logic for the computer's turn. */
+        function computerTurn() {
+            log(`--- COMPUTER TURN: ${computer.name} ---`, 'turn');
+            
+            computer.applyDOTs();
+            player.decrementCooldown();
+
+            if (checkWinCondition()) return;
+
+            let actionUsed = false;
+            let useAbility = false;
+            
+            // Simple AI logic:
+            if (computer.specialAbility === "Wealth Heal" && computer.health < 50 && computer.cooldownRemaining === 0) {
+                // Mansa Musa: Heal if health is low
+                useAbility = true;
+            } else if (computer.specialAbility === "Pharaoh's Curse" && player.curseTurns === 0 && computer.cooldownRemaining === 0) {
+                // Tutankhamun: Prioritize curse if the player isn't already cursed
+                useAbility = true;
+            } else if (computer.cooldownRemaining === 0 && Math.random() < 0.5) { 
+                // General: 50% chance to use ability if available
+                useAbility = true;
+            }
+            
+            if (useAbility) {
+                actionUsed = computer.useAbility(player);
+            }
+
+            // If ability wasn't used (either failed or AI chose not to), attack
+            if (!actionUsed) {
+                computer.attack(player);
+            }
+
+            updateUI();
+            
+            // Check win condition immediately after computer's move
+            if (!checkWinCondition()) {
+                isPlayerTurn = true;
+                log(`--- YOUR TURN: ${player.name} ---`, 'turn');
+                updateUI();
+            }
+        }
+
+        /** Handles player button clicks (Attack or Ability). */
+        function handleAction(actionType) {
+            if (!isPlayerTurn || !isGameActive) return;
+            
+            // 1. Apply DOTs and decrement opponent's cooldown
+            player.applyDOTs();
+            computer.decrementCooldown();
+
+            if (checkWinCondition()) return;
+
+            if (actionType === 'attack') {
+                player.attack(computer);
+            } else if (actionType === 'ability') {
+                const used = player.useAbility(computer);
+                if (!used) return; // Stay on player turn if ability failed due to cooldown
+            }
+
+            updateUI();
+            if (checkWinCondition()) return;
+            
+            // 2. Pass turn to computer
+            isPlayerTurn = false;
+            updateUI(); // Update UI to disable buttons
+            
+            // Computer takes its turn after a brief delay
+            setTimeout(computerTurn, 1000); 
+        }
+
+        /** Gets the selected champion from the dropdown and starts the game. */
+        function startBattleFromSelection() {
+            const selectedName = document.getElementById('champion-select').value;
+            if (selectedName) {
+                initializeGame(selectedName);
+            }
+        }
+
+        /** Initializes the game screen after character selection. */
+        function initializeGame(selectedName) {
+            document.getElementById('selection-screen').classList.add('hidden');
+            document.getElementById('battle-screen').classList.remove('hidden');
+            document.getElementById('battle-log').innerHTML = ''; // Clear previous log
+
+            // Initialize Fighters
+            player = new Fighter(selectedName, BASE_STATS[selectedName]);
+            
+            const availableNames = Object.keys(BASE_STATS).filter(name => name !== selectedName);
+            const computerName = availableNames[Math.floor(Math.random() * availableNames.length)];
+            computer = new Fighter(computerName, BASE_STATS[computerName]);
+
+            isPlayerTurn = true;
+            isGameActive = true;
+
+            log(`*** BATTLE START: ${player.name} vs. ${computer.name} ***`, 'turn');
+            log(`--- YOUR TURN: ${player.name} ---`, 'turn');
+            updateUI();
+        }
+        
+        /** Restarts the game by showing the selection screen. */
+        function restartGame() {
+            document.getElementById('game-over-modal').classList.add('hidden');
+            document.getElementById('battle-screen').classList.add('hidden');
+            document.getElementById('selection-screen').classList.remove('hidden');
+            player = null;
+            computer = null;
+            isGameActive = false;
+            updateUI(); // Clear UI elements
+        }
+
+        /** Populates the character selection dropdown on load. */
+        function populateCharacterSelection() {
+            const select = document.getElementById('champion-select');
+            select.innerHTML = '<option value="" disabled selected>-- Choose a Fighter --</option>'; // Default placeholder
+
+            Object.keys(BASE_STATS).forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+            });
+
+            // Ensure the start button is disabled until a choice is made
+            const startButton = document.getElementById('start-battle-btn');
+            startButton.disabled = true;
+
+            // Enable the button only when a selection is made
+            select.addEventListener('change', () => {
+                startButton.disabled = !select.value;
+            });
+        }
+        
+        // --- Initialization on Window Load ---
+        window.onload = populateCharacterSelection;
+
+    </script>
+</body>
+</html>
